@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Umbrella, AlertTriangle, CheckCircle2, Wind, Clock, ShieldCheck, Sparkles, Calendar, ChevronRight } from "lucide-react";
+import { Umbrella, CheckCircle2, Wind, Clock, ShieldCheck, Sparkles } from "lucide-react";
 import { PredictionResult } from "../lib/ml/engine";
 import { WeatherData } from "../lib/weather/openMeteo";
 
@@ -29,7 +29,6 @@ export const PredictionGauge: React.FC<PredictionGaugeProps> = ({
     windWarning,
     selectedTimeLabel,
     targetRainProb,
-    highRiskTimeWindow,
   } = prediction;
 
   // Colors based on risk level
@@ -53,7 +52,7 @@ export const PredictionGauge: React.FC<PredictionGaugeProps> = ({
         };
       case "OPTIONAL_FOLDABLE":
         return {
-          strokeColor: "#eab308", // Yellow / Amber
+          strokeColor: "#eab308", // Amber
           glowColor: "rgba(234, 179, 8, 0.4)",
           badgeBg: "bg-amber-500/15 text-amber-300 border-amber-500/30",
           iconColor: "text-amber-400",
@@ -96,7 +95,7 @@ export const PredictionGauge: React.FC<PredictionGaugeProps> = ({
             <h3 className="text-sm font-semibold text-slate-100">
               When are you heading outside today?
             </h3>
-            <p className="text-xs text-slate-400">Select a target hour to calculate exact rain probability and umbrella need.</p>
+            <p className="text-xs text-slate-400">Select a target hour to calculate rain probability and umbrella need.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
@@ -223,17 +222,6 @@ export const PredictionGauge: React.FC<PredictionGaugeProps> = ({
             <p className="text-sm text-slate-300 leading-relaxed max-w-xl">
               {recommendationSubtitle}
             </p>
-
-            {/* Threshold Rule Info */}
-            <div className="w-full text-xs p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-400">
-              <div className="font-semibold text-slate-300 mb-1">Threshold Accuracy Rules:</div>
-              <ul className="list-disc list-inside space-y-0.5 text-[11px] text-slate-400">
-                <li>Rain chance &lt; 20% → Low umbrella score (&lt;25%, stay unburdened)</li>
-                <li>Rain chance 20%–25% → Calibrated to ~50% (Optional compact umbrella)</li>
-                <li>Rain chance 25%–50% → Calibrated to 75%–80% (Recommended)</li>
-                <li>Rain chance &gt; 50% → Calibrated to 80%+ (Definite Umbrella Required)</li>
-              </ul>
-            </div>
 
             {/* High Wind Warning Alert */}
             {windWarning && (

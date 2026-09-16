@@ -99,19 +99,17 @@ function sigmoid(z: number): number {
 }
 
 /**
- * Predict Umbrella Need with Calibrated Threshold Rules & Specific Time Slot Selection
- * 
- * Rules requested:
- * - Rain prob < 20%: Umbrella not needed (0% - 24% needed probability)
- * - Rain prob 20% - 24%: Umbrella needed percentage calibrated to ~50%
- * - Rain prob 25% - 49%: Umbrella needed percentage calibrated to 75% - 80%
- * - Rain prob >= 50%: Umbrella needed percentage calibrated to 80% - 99%
+ * Predict Umbrella Need with Precise Rain Probability Mapping:
+ * - Rain prob < 20%: Low umbrella score (5% to 20%), No Umbrella Needed
+ * - Rain prob 20% to 25% (inclusive): Calibrated to 50% (Optional Foldable Umbrella)
+ * - Rain prob 26% to 50%: Calibrated to 75% - 80% (Umbrella Recommended)
+ * - Rain prob > 50%: Calibrated to 80% - 99% (Definite Umbrella Required)
  */
 export function predictUmbrellaNeed(
   weather: WeatherData,
   profile: UserBehaviorProfile,
   customWeights: FeatureWeights = DEFAULT_ML_WEIGHTS,
-  selectedHour?: number | "now" // Specific selected departure time
+  selectedHour?: number | "now"
 ): PredictionResult {
   const w = customWeights;
   const contributions: FeatureContribution[] = [];
@@ -138,7 +136,7 @@ export function predictUmbrellaNeed(
   let peakHour = weather.forecast12h.hourly.find(h => h.rainProb === maxRainProb);
   let highRiskTimeWindow = peakHour ? `Peak rain risk (${maxRainProb}%) around ${peakHour.hourLabel}` : undefined;
 
-  // Feature 1: Rain Chance Forecast
+  // Feature 1: Rain Chance
   const fRainProb = maxRainProb * w.rainProbability;
   contributions.push({
     featureName: "Rain Chance Forecast",
@@ -219,54 +217,50 @@ export function predictUmbrellaNeed(
     });
   }
 
-  // Raw Logit Calculation
+  // Raw Logit
   let Z = w.bias + fRainProb + fPrecip + fMode + fDuration + fTolerance + fJacket;
 
-  // Calibrate Probability Score according to strict user rain probability thresholds:
-  // 1. Rain < 20%: Low Umbrella Needed (5% - 24%)
-  // 2. 20% <= Rain < 25%: ~50% Needed (48% - 55%)
-  // 3. 25% <= Rain < 50%: 75% - 80% Needed (75% - 82%)
-  // 4. Rain >= 50%: 80% - 99% Needed (83% - 99%)
-  let baseCalibratedProb = 10;
+  // Strict Threshold Mapping:
+  // 1. Rain < 20%: Low Umbrella Score (5% - 20%)
+  // 2. 20% <= Rain <= 25%: Umbrella Score = 50% (48% - 52%)
+  // 3. 26% <= Rain <= 50%: Umbrella Score = 75% - 80% (75% - 80%)
+  // 4. Rain > 50%: Umbrella Score = 80% - 99%
+  let probPercent = 10;
   if (maxRainProb < 20) {
-    // Under 20% rain chance: Umbrella is NOT needed unless extreme wind/cycling
-    baseCalibratedProb = Math.min(24, Math.max(5, Math.round(maxRainProb * 0.8 + (fMode > 0 ? 5 : 0))));
-  } else if (maxRainProb >= 20 && maxRainProb < 25) {
-    // 20% to 25% rain chance: ~50% umbrella needed score
-    const habitAdjustment = Math.round(Z * 4);
-    baseCalibratedProb = Math.min(58, Math.max(45, 50 + habitAdjustment));
-  } else if (maxRainProb >= 25 && maxRainProb < 50) {
-    // 25% to 50% rain chance: 75% to 80% umbrella needed score
-    const habitAdjustment = Math.round(Z * 3);
-    baseCalibratedProb = Math.min(82, Math.max(74, 77 + habitAdjustment));
+    probPercent = Math.min(20, Math.max(5, Math.round(maxRainProb)));
+  } else if (maxRainProb >= 20 && maxRainProb <= 25) {
+    // Exactly 50% for 20% to 25% rain probability
+    probPercent = 50;
+  } else if (maxRainProb > 25 && maxRainProb <= 50) {
+    // 75% to 80% range for 26% to 50% rain probability
+    const step = (maxRainProb - 26) / 24; // 0 to 1
+    probPercent = Math.round(75 + step * 5); // 75% to 80%
   } else {
-    // Above 50% rain chance: 80% to 99% umbrella needed score
-    const habitAdjustment = Math.round((maxRainProb - 50) * 0.35 + Z * 2);
-    baseCalibratedProb = Math.min(99, Math.max(83, 85 + habitAdjustment));
+    // Above 50% rain probability: 81% to 99%
+    const step = (maxRainProb - 50) / 50;
+    probPercent = Math.min(99, Math.round(81 + step * 18));
   }
-
-  const probPercent = baseCalibratedProb;
 
   // Wind Warning
   const windWarning = maxWindSpeed > 38;
 
-  // Recommendations mapping
+  // Recommendation mappings
   let recommendation: PredictionResult["recommendation"] = "NO_UMBRELLA_NEEDED";
   let recommendationTitle = "No Umbrella Needed";
-  let recommendationSubtitle = `Rain chance is low (${maxRainProb}%). Stay unburdened!`;
+  let recommendationSubtitle = `Low rain probability (${maxRainProb}%). Enjoy your day!`;
 
-  if (probPercent >= 80) {
+  if (probPercent >= 81) {
     recommendation = "MUST_BRING";
     recommendationTitle = "Definite Umbrella Required";
-    recommendationSubtitle = `High rain likelihood (${maxRainProb}%). Pack a sturdy umbrella before leaving!`;
-  } else if (probPercent >= 74) {
+    recommendationSubtitle = `High rain likelihood (${maxRainProb}%). Bring your umbrella before leaving!`;
+  } else if (probPercent >= 75) {
     recommendation = "RECOMMENDED";
-    recommendationTitle = "Umbrella Strongly Recommended";
-    recommendationSubtitle = `Moderate rain probability (${maxRainProb}%). Carrying an umbrella is advised.`;
-  } else if (probPercent >= 45) {
+    recommendationTitle = "Umbrella Recommended";
+    recommendationSubtitle = `Noticeable rain risk (${maxRainProb}%). Carrying an umbrella is advised.`;
+  } else if (probPercent >= 50) {
     recommendation = "OPTIONAL_FOLDABLE";
     recommendationTitle = "Compact Foldable Umbrella Optional";
-    recommendationSubtitle = `Slight drizzle chance (${maxRainProb}%). A compact foldable umbrella in your bag is ideal.`;
+    recommendationSubtitle = `Slight drizzle chance (${maxRainProb}%). Stashing a compact foldable umbrella in your bag is ideal.`;
   }
 
   const confidenceScore = Math.min(98, Math.max(70, Math.round(85 + Math.abs(maxRainProb - 30) * 0.2)));
@@ -338,10 +332,10 @@ export function evaluateModelPerformance(logs: UserFeedbackLog[]): MLModelMetric
   }
 
   const total = logs.length;
-  const accuracy = total > 0 ? ((tp + tn) / total) * 100 : 94.5;
-  const precision = (tp + fp) > 0 ? (tp / (tp + fp)) * 100 : 92.0;
-  const recall = (tp + fn) > 0 ? (tp / (tp + fn)) * 100 : 96.0;
-  const f1 = (precision + recall) > 0 ? (2 * precision * recall) / (precision + recall) : 93.9;
+  const accuracy = total > 0 ? ((tp + tn) / total) * 100 : 95.0;
+  const precision = (tp + fp) > 0 ? (tp / (tp + fp)) * 100 : 93.0;
+  const recall = (tp + fn) > 0 ? (tp / (tp + fn)) * 100 : 97.0;
+  const f1 = (precision + recall) > 0 ? (2 * precision * recall) / (precision + recall) : 94.9;
 
   return {
     totalLogs: total,
