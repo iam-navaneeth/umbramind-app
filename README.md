@@ -4,13 +4,16 @@
 
 ### *Personalized Weather Intelligence & Behavioral Machine Learning System*
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_App-06b6d4?style=for-the-badge&logo=vercel)](https://umbramind-app.vercel.app/)
 [![Next.js](https://img.shields.io/badge/Next.js-14.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38bdf8?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel)](https://vercel.com/)
-[![Open-Meteo](https://img.shields.io/badge/API-Open--Meteo-06b6d4?style=for-the-badge)](https://open-meteo.com/)
 
-[**Live Demo**](https://umbramind-app.vercel.app) • [**Report Bug**](https://github.com/iam-navaneeth/umbramind-app/issues) • [**Request Feature**](https://github.com/iam-navaneeth/umbramind-app/issues)
+---
+
+### 🌐 View the Live Application
+> **If you want to view the application, go to:**  
+> 👉 **[https://umbramind-app.vercel.app/](https://umbramind-app.vercel.app/)**
 
 ---
 
@@ -47,7 +50,6 @@ Whether you're walking, cycling, taking public transit, or driving, UmbraMind ad
 | **Weather Engine** | Open-Meteo Forecast & Geocoding API |
 | **ML Classifier** | Custom In-Browser Logistic Regression & SGD Engine |
 | **Icons & UI** | Lucide React + Framer Motion |
-| **Deployment** | Vercel |
 
 ---
 
@@ -67,57 +69,16 @@ $$w_j \leftarrow w_j + \eta \cdot (y - \hat{y}) \cdot X_j$$
 
 ---
 
-## 🚀 Quick Start (Run Locally)
+## 👨‍💻 Developer Credit
 
-### Prerequisites
-- Node.js (v18.0 or higher)
-- npm or yarn
-
-### Installation
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/iam-navaneeth/umbramind-app.git
-   cd umbramind-app
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Run the development server**:
-   ```bash
-   npm run dev
-   ```
-
-4. **Open in browser**:
-   Navigate to [http://localhost:3000](http://localhost:3000).
-
----
-
-## ☁️ Deploy to Vercel
-
-Deploy your own instance of UmbraMind in 1 click:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fiam-navaneeth%2Fumbramind-app)
-
-Or via Vercel CLI:
-```bash
-npx vercel
-```
-
----
-
-## 👤 Author
-
-**Navaneeth**
-- GitHub: [@iam-navaneeth](https://github.com/iam-navaneeth)
+Developed with 💖 by **Navaneeth Krishnan**  
+- GitHub: [@iam-navaneeth](https://github.com/iam-navaneeth)  
+- Live Web Application: [https://umbramind-app.vercel.app/](https://umbramind-app.vercel.app/)
 
 ---
 
 <div align="center">
 
-*Made with 💖, Next.js, and Machine Learning*
+*UmbraMind — Next-Gen AI Weather Intelligence*
 
 </div>
