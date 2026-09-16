@@ -30,7 +30,7 @@ import {
   saveStoredLogs,
 } from "@/lib/storage/userHistory";
 
-import { AlertCircle, RefreshCw, Sparkles, MapPin } from "lucide-react";
+import { AlertCircle, RefreshCw, Sparkles } from "lucide-react";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"predict" | "profile" | "ml-analytics">("predict");
@@ -40,6 +40,9 @@ export default function Home() {
   const [weatherLoading, setWeatherLoading] = useState<boolean>(true);
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState<boolean>(false);
+
+  // Time slot selection state ("When are you going outside?")
+  const [selectedHour, setSelectedHour] = useState<number | "now">("now");
 
   // User Habit Profile & ML weights state
   const [profile, setProfile] = useState<UserBehaviorProfile>(getStoredProfile);
@@ -133,8 +136,8 @@ export default function Home() {
     saveStoredWeights(updatedWeights);
   };
 
-  // Compute prediction
-  const prediction = weather ? predictUmbrellaNeed(weather, profile, weights) : null;
+  // Compute prediction specifically for selected departure time
+  const prediction = weather ? predictUmbrellaNeed(weather, profile, weights, selectedHour) : null;
   const metrics = evaluateModelPerformance(logs);
 
   return (
@@ -177,9 +180,12 @@ export default function Home() {
               {/* Weather Status & Hourly Timeline */}
               <WeatherHero weather={weather} />
 
-              {/* Umbrella Recommendation Gauge Card */}
+              {/* Umbrella Recommendation Gauge & Departure Time Selector Card */}
               <PredictionGauge
                 prediction={prediction}
+                weather={weather}
+                selectedHour={selectedHour}
+                onSelectHour={setSelectedHour}
                 onOpenFeedbackModal={() => setIsFeedbackOpen(true)}
               />
 
@@ -218,7 +224,7 @@ export default function Home() {
               isOpen={isFeedbackOpen}
               onClose={() => setIsFeedbackOpen(false)}
               onSubmitLog={handleAddLog}
-              currentRainProb={weather.forecast12h.maxRainProb}
+              currentRainProb={prediction.targetRainProb}
               currentMode={profile.commuteMode}
               currentPredictionProb={prediction.probabilityPercent}
               currentRecommendation={prediction.recommendation}
@@ -233,9 +239,9 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-cyan-400" />
             <span className="font-semibold text-slate-300">UmbraMind AI</span>
-            <span>— Personalized Weather & Personal Habit ML Classifier</span>
+            <span>— Developed by Navaneeth Krishnan</span>
           </div>
-          <div>Vercel Deployment Ready | Powered by Open-Meteo & Browser ML</div>
+          <div>Vercel Ready | Powered by Open-Meteo & Browser ML</div>
         </div>
       </footer>
     </div>
