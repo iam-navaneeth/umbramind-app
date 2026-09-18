@@ -66,7 +66,9 @@ export const Header: React.FC<HeaderProps> = ({
                   UmbraMind AI
                 </span>
               </div>
-              <p className="text-[11px] sm:text-xs text-slate-400 font-medium">Predictive Umbrella & Weather Companion</p>
+              <p className="text-[11px] sm:text-xs text-slate-400 font-medium">
+                Predictive Umbrella AI — <span className="text-cyan-300 font-semibold">Developed by Navaneeth Krishnan</span>
+              </p>
             </div>
           </div>
 
