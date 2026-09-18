@@ -210,22 +210,18 @@ export async function fetchWeatherData(lat: number, lon: number, locationName?: 
   const hourly = data.hourly;
   const daily = data.daily;
 
-  // Extract next 12 hours forecast starting from current hour
-  const now = new Date();
-  const currentHour = now.getHours();
+  // Extract next 12 hours forecast starting from CURRENT HOUR (using Open-Meteo's current.time)
+  const currentTimeIso = current?.time || "";
   const next12Hours: WeatherData["forecast12h"]["hourly"] = [];
 
   let maxRainProb = 0;
   let totalRainMm = 0;
   let maxWindSpeed = 0;
 
-  // Find matching start index in hourly.time array
+  // Find matching start index in hourly.time array using current.time ISO string
   let startIndex = 0;
   if (hourly && hourly.time && Array.isArray(hourly.time)) {
-    const matchIdx = hourly.time.findIndex((tStr: string) => {
-      const hDate = new Date(tStr);
-      return hDate.getHours() === currentHour && hDate.getDate() === now.getDate();
-    });
+    const matchIdx = hourly.time.findIndex((tStr: string) => tStr >= currentTimeIso);
     if (matchIdx !== -1) {
       startIndex = matchIdx;
     }
@@ -234,13 +230,23 @@ export async function fetchWeatherData(lat: number, lon: number, locationName?: 
   const totalPoints = Math.min(12, (hourly?.time?.length || 0) - startIndex);
   for (let i = startIndex; i < startIndex + totalPoints; i++) {
     const timeStr = hourly.time[i];
-    const hourDate = new Date(timeStr);
-    const hourLabel = hourDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const rainProb = hourly.precipitation_probability[i] || 0;
-    const rainMm = hourly.precipitation[i] || 0;
-    const windSpeed = hourly.wind_speed_10m[i] || 0;
-    const temp = hourly.temperature_2m[i] || 0;
-    const weatherCode = hourly.weather_code[i] || 0;
+    
+    // Format hour label robustly (e.g., "02:00 PM")
+    let hourLabel = "";
+    if (timeStr && timeStr.includes("T")) {
+      const hNum = parseInt(timeStr.split("T")[1].split(":")[0], 10);
+      const period = hNum >= 12 ? "PM" : "AM";
+      const h12 = hNum % 12 === 0 ? 12 : hNum % 12;
+      hourLabel = `${h12.toString().padStart(2, "0")}:00 ${period}`;
+    } else {
+      hourLabel = new Date(timeStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    const rainProb = hourly.precipitation_probability ? (hourly.precipitation_probability[i] ?? 0) : 0;
+    const rainMm = hourly.precipitation ? (hourly.precipitation[i] ?? 0) : 0;
+    const windSpeed = hourly.wind_speed_10m ? (hourly.wind_speed_10m[i] ?? 0) : 0;
+    const temp = hourly.temperature_2m ? (hourly.temperature_2m[i] ?? 0) : 0;
+    const weatherCode = hourly.weather_code ? (hourly.weather_code[i] ?? 0) : 0;
 
     if (rainProb > maxRainProb) maxRainProb = rainProb;
     totalRainMm += rainMm;

@@ -118,7 +118,12 @@ export function predictUmbrellaNeed(
   let selectedTimeLabel = "Current & Schedule Forecast";
 
   if (selectedHour !== undefined && selectedHour !== "now" && relevantHourly.length > 0) {
-    const targetH = relevantHourly.find(h => new Date(h.time).getHours() === selectedHour);
+    const targetH = relevantHourly.find(h => {
+      if (h.time && h.time.includes("T")) {
+        return parseInt(h.time.split("T")[1].split(":")[0], 10) === selectedHour;
+      }
+      return new Date(h.time).getHours() === selectedHour;
+    });
     if (targetH) {
       relevantHourly = [targetH];
       selectedTimeLabel = `Target Time Slot: ${targetH.hourLabel}`;
@@ -128,9 +133,9 @@ export function predictUmbrellaNeed(
     selectedTimeLabel = `Current Situation (${relevantHourly[0].hourLabel})`;
   }
 
-  const maxRainProb = relevantHourly.reduce((max, h) => Math.max(max, h.rainProb), weather.forecast12h.maxRainProb);
+  const maxRainProb = relevantHourly.length > 0 ? relevantHourly.reduce((max, h) => Math.max(max, h.rainProb), 0) : weather.forecast12h.maxRainProb;
   const totalRainMm = relevantHourly.reduce((sum, h) => sum + h.rainMm, 0);
-  const maxWindSpeed = relevantHourly.reduce((max, h) => Math.max(max, h.windSpeed), weather.forecast12h.maxWindSpeed);
+  const maxWindSpeed = relevantHourly.length > 0 ? relevantHourly.reduce((max, h) => Math.max(max, h.windSpeed), 0) : weather.forecast12h.maxWindSpeed;
 
   // Peak rain hour window
   let peakHour = weather.forecast12h.hourly.find(h => h.rainProb === maxRainProb);
