@@ -1,8 +1,12 @@
 <div align="center">
 
-# ☔ UmbraMind — AI Umbrella Reminder Model
+# ☔ Umbrella App (UmbraMind AI)
 
-### *Personalized Weather Intelligence & Behavioral Machine Learning System*
+### *Predictive Weather Intelligence & Personalized Umbrella Companion*
+
+**Developer**: Navaneeth Krishnan  
+**Live Application**: [https://umbramind-app.vercel.app/](https://umbramind-app.vercel.app/)  
+**GitHub Repository**: [https://github.com/iam-navaneeth/umbramind-app](https://github.com/iam-navaneeth/umbramind-app)
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_App-06b6d4?style=for-the-badge&logo=vercel)](https://umbramind-app.vercel.app/)
 [![Next.js](https://img.shields.io/badge/Next.js-14.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
@@ -11,9 +15,7 @@
 
 ---
 
-### 🌐 View the Live Application
-> **If you want to view the application, go to:**  
-> 👉 **[https://umbramind-app.vercel.app/](https://umbramind-app.vercel.app/)**
+> 📢 **"Search your place to check if you need to bring an umbrella today!"**
 
 ---
 
@@ -21,22 +23,46 @@
 
 ## 🌟 Overview
 
-**UmbraMind** is a real-world Machine Learning web application that predicts whether you're likely to need an umbrella today. Unlike basic weather apps that only show rain percentages, **UmbraMind combines real-time meteorological metrics with your personal outdoor exposure history and transport habits** to make an intelligent, tailored recommendation.
+**Umbrella App (UmbraMind AI)** is an intelligent, high-precision weather application developed by **Navaneeth Krishnan**. Unlike basic weather apps that only show generic rain percentages, Umbrella App combines **ECMWF & ICON High-Resolution Meteorological Models** with your personal outdoor exposure history and commute habits to give you an instant, definitive answer: **Do you need an umbrella today?**
 
-Whether you're walking, cycling, taking public transit, or driving, UmbraMind adapts its decision boundary to fit your lifestyle! 🚶‍♂️🚴‍♀️🚌🚗
+Whether you are walking, cycling, taking public transit, or driving, Umbrella App adapts its predictive AI boundary to fit your lifestyle! 🚶‍♂️🚴‍♀️🚌🚗
 
 ---
 
 ## 🔥 Key Features
 
-- 🛰️ **GPS & Global Location Search**: Auto-detects location via HTML5 Geolocation or searches any city worldwide via Open-Meteo Weather API (no API key required).
-- ⏱️ **12-Hour Hourly Rain Forecast**: Interactive timeline displaying precipitation probability (%) and rain volume (mm) hour by hour.
-- 🧠 **Explainable AI (XAI)**: SHAP-style feature attribution bars revealing *why* the model made its decision (e.g. `+35% Rain Probability`, `+20% Cycling Commute`, `-15% Waterproof Jacket`).
-- 🌪️ **High Wind Alert System**: Detects severe wind gusts (>38 km/h) where traditional umbrellas flip, alerting you to carry heavy-duty gear or rain ponchos.
-- 🎯 **Habit Profile Tuner**: Adjust outdoor walking minutes, rain sensitivity (Zero Tolerance vs Risk Taker), and preferred gear.
+- ⚡ **Instant Umbrella Decision**: Prominent top recommendation card displaying clear decision tags (**"YES - UMBRELLA REQUIRED!"**, **"RECOMMENDED"**, **"OPTIONAL FOLDABLE UMBRELLA"**, **"NO UMBRELLA NEEDED"**).
+- 📍 **Hyper-Local Village & Global Place Search**: Instant search covering global cities as well as local panchayats and villages (e.g. **Pallassana**, **Kollengode**, **Cheramangalam**, **Palakkad**, **Chittur**, **Alathur**, **Kochi**, etc.) using multi-provider geocoding (Open-Meteo + OpenStreetMap Nominatim fallback).
+- 🧭 **Accurate GPS & Reverse Geocoding**: HTML5 Geolocation auto-detects your location and performs reverse geocoding to resolve your exact city or village name (e.g., *"Pallassana, Palakkad"*).
+- 📱 **Mobile-First Layout**: The **Umbrella Recommendation Gauge comes FIRST** (especially on mobile devices), followed by **Detailed Weather Stats DOWN BELOW**.
+- 🌡️ **High-Accuracy Meteorological System**: Syncs with ECMWF & ICON high-resolution regional/global ensemble models, tracking:
+  - **Dew Point Spread** ($\le 2^\circ\text{C}$ condensation cloudburst tracking)
+  - **Atmospheric CAPE Energy** ($> 250\text{ J/kg}$ convective thunderstorm detection)
+  - **RealFeel Apparent Temp** & **Surface Pressure** (hPa)
+  - **Wind Gusts** ($> 35\text{ km/h}$ windproof umbrella alerts)
+- ⏱️ **12-Hour Hourly Rain Timeline**: Accurately synced to the current local hour, showing precipitation probability (%) and rain volume (mm) hour by hour.
+- 🧠 **Explainable AI (XAI)**: SHAP-style feature attribution bars revealing *why* the model made its decision.
+- 🎯 **Habit Profile Tuner**: Adjust outdoor exposure minutes, transport mode, and rain tolerance.
 - 📊 **ML Analytics & Confusion Matrix**: Real-time evaluation of Model Accuracy, Precision, Recall, and F1 Score.
-- 🧪 **Interactive "What-If" Simulator**: Live control sliders allowing you to test how the model reacts under simulated weather conditions.
-- 🔄 **Online Learning Feedback Loop**: Log today's ground truth ("Did you carry an umbrella? Did it rain?") to retrain model feature weights locally via Stochastic Gradient Descent (SGD).
+- 🔄 **In-Browser SGD Model Retraining**: Log daily ground truth outcomes to retrain model feature weights locally via Stochastic Gradient Descent (SGD).
+
+---
+
+## 🔒 Privacy & Data Protection Policy
+
+Umbrella App is designed with **Privacy-First & Local-First Security Architecture**:
+
+### 1. 100% Client-Side Local Storage Privacy
+- Your personal habit profile, transport mode preferences, and daily feedback logs are **stored exclusively in your local browser storage (`localStorage`)**.
+- **No user data is ever uploaded to central databases or external servers.**
+
+### 2. Geolocation Privacy
+- HTML5 GPS coordinates are used **transiently solely to request real-time weather forecasts and resolve your city/village name**.
+- Coordinates are never saved, tracked, or shared.
+
+### 3. Open-Source Codebase & Secret Protection
+- Strictly enforced `.gitignore` security ensures no environment variables (`.env`, `.env.local`), private keys, or API credentials are committed to GitHub.
+- Public environment template (`.env.example`) allows open-source contributions without exposing private keys.
 
 ---
 
@@ -46,39 +72,51 @@ Whether you're walking, cycling, taking public transit, or driving, UmbraMind ad
 | :--- | :--- |
 | **Framework** | Next.js 14 (App Router) |
 | **Language** | TypeScript |
-| **Styling** | Tailwind CSS + Glassmorphism Aesthetics |
-| **Weather Engine** | Open-Meteo Forecast & Geocoding API |
-| **ML Classifier** | Custom In-Browser Logistic Regression & SGD Engine |
+| **Styling** | Vanilla Tailwind CSS + Glassmorphism Aesthetics |
+| **Weather Engine** | Open-Meteo High-Resolution Ensemble API (ECMWF / ICON) |
+| **Geocoding** | Open-Meteo + OpenStreetMap Nominatim + BigDataCloud Reverse Geocoding |
+| **ML Classifier** | Custom In-Browser Logistic Regression & SGD Retraining Engine |
 | **Icons & UI** | Lucide React + Framer Motion |
 
 ---
 
-## 🔬 Machine Learning Concepts
+## 🚀 Local Installation & Setup
 
-### 1. Classification Model Equation
-The probability $P(\text{Need Umbrella})$ is computed using a weighted logit $Z$ passed into a Sigmoid activation function:
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/iam-navaneeth/umbramind-app.git
+   cd umbramind-app
+   ```
 
-$$Z = w_0 + w_{\text{rain\_prob}} \cdot X_{\text{rain\_prob}} + w_{\text{precip}} \cdot X_{\text{precip}} + w_{\text{commute}} \cdot X_{\text{commute}} + w_{\text{mode}} \cdot X_{\text{mode}} + \dots$$
+2. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-$$P(\text{Need Umbrella}) = \frac{1}{1 + e^{-Z}}$$
+3. **Run Development Server**:
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### 2. Online Model Weight Retraining (SGD)
-When users log daily outcomes, feature weights update automatically via Stochastic Gradient Descent:
-
-$$w_j \leftarrow w_j + \eta \cdot (y - \hat{y}) \cdot X_j$$
+4. **Build Production Bundle**:
+   ```bash
+   npm run build
+   npm run start
+   ```
 
 ---
 
 ## 👨‍💻 Developer Credit
 
 Developed with 💖 by **Navaneeth Krishnan**  
-- GitHub: [@iam-navaneeth](https://github.com/iam-navaneeth)  
-- Live Web Application: [https://umbramind-app.vercel.app/](https://umbramind-app.vercel.app/)
+- **GitHub**: [@iam-navaneeth](https://github.com/iam-navaneeth)  
+- **Live Web Application**: [https://umbramind-app.vercel.app/](https://umbramind-app.vercel.app/)
 
 ---
 
 <div align="center">
 
-*UmbraMind — Next-Gen AI Weather Intelligence*
+*Umbrella App (UmbraMind AI) — Intelligent Weather Companion*
 
 </div>
