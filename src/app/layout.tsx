@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "UmbraMind | Intelligent AI Umbrella Prediction Model",
+  title: "Umbrella App (UmbraMind AI) | Intelligent Umbrella & Weather Prediction Model",
   description: "Predict whether you need an umbrella by combining real-time weather forecasts with your personal commute behavior history and machine learning.",
   keywords: ["Umbrella Prediction", "Machine Learning", "Weather AI", "Commute Weather", "Vercel Web App"],
 };

@@ -294,7 +294,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-cyan-400" />
-            <span className="font-semibold text-slate-300">Umberla App (UmbraMind AI)</span>
+            <span className="font-semibold text-slate-300">Umbrella App (UmbraMind AI)</span>
             <span>— Predictive Weather & Umbrella Companion</span>
           </div>
           <div>Vercel Ready | Powered by Open-Meteo, Nominatim & ML</div>

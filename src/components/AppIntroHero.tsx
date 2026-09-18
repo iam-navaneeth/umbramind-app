@@ -68,7 +68,7 @@ export const AppIntroHero: React.FC<AppIntroHeroProps> = ({
           <div className="flex flex-wrap items-center justify-center gap-2">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/20 via-sky-500/20 to-purple-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-semibold tracking-wide shadow-inner">
               <Sparkles className="w-4 h-4 text-cyan-400 animate-spin-slow" />
-              <span>Welcome to UMBERLA APP (UmbraMind AI)</span>
+              <span>Welcome to UMBRELLA APP (UmbraMind AI)</span>
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-extrabold tracking-wide shadow-sm">
               <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping" />
