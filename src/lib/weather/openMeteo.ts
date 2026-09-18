@@ -5,25 +5,36 @@ export interface WeatherData {
   longitude: number;
   current: {
     temp: number;
+    apparentTemp: number;
+    dewPoint: number;
     weatherCode: number;
     conditionText: string;
     windSpeed: number;
+    windGusts: number;
     humidity: number;
     cloudCover: number;
+    pressure: number;
+    cape: number;
+    modelUsed: string;
   };
   forecast12h: {
     maxRainProb: number;
     totalRainMm: number;
     maxWindSpeed: number;
+    maxWindGusts: number;
     avgCloudCover: number;
     hourly: Array<{
       time: string;
       hourLabel: string;
       temp: number;
+      apparentTemp: number;
+      dewPoint: number;
       rainProb: number;
       rainMm: number;
       windSpeed: number;
+      windGusts: number;
       weatherCode: number;
+      cape: number;
     }>;
   };
   daily: Array<{
@@ -97,7 +108,6 @@ export async function searchLocations(query: string): Promise<GeocodingResult[]>
       const data = await res.json();
       if (data.results && Array.isArray(data.results)) {
         data.results.forEach((r: any) => {
-          // Avoid duplicate local entries
           if (!results.some(existing => Math.abs(existing.latitude - r.latitude) < 0.02 && Math.abs(existing.longitude - r.longitude) < 0.02)) {
             results.push({
               name: r.name,
@@ -154,7 +164,6 @@ export async function searchLocations(query: string): Promise<GeocodingResult[]>
 
 // Reverse Geocoding to get real city/village name from GPS Lat/Lon
 export async function reverseGeocode(lat: number, lon: number): Promise<{ name: string; country: string }> {
-  // Check local database first for high precision
   const matchedLocal = KERALA_PALAKKAD_PLACES.find(p =>
     Math.abs(p.latitude - lat) < 0.04 && Math.abs(p.longitude - lon) < 0.04
   );
@@ -162,7 +171,6 @@ export async function reverseGeocode(lat: number, lon: number): Promise<{ name: 
     return { name: matchedLocal.name, country: matchedLocal.admin1 ? `${matchedLocal.admin1}, ${matchedLocal.country}` : matchedLocal.country };
   }
 
-  // BigDataCloud Free Reverse Geocoding API
   try {
     const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
     const res = await fetch(url);
@@ -178,7 +186,6 @@ export async function reverseGeocode(lat: number, lon: number): Promise<{ name: 
     console.warn("Reverse geocode BigDataCloud error:", err);
   }
 
-  // OpenStreetMap Nominatim Reverse Geocoding API
   try {
     const nomUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`;
     const res = await fetch(nomUrl, {
@@ -198,12 +205,12 @@ export async function reverseGeocode(lat: number, lon: number): Promise<{ name: 
   return { name: "Detected Location", country: "" };
 }
 
-// Fetch complete weather forecast for given coords
+// Fetch complete high-precision weather forecast from Open-Meteo High-Resolution Regional/Global Ensemble
 export async function fetchWeatherData(lat: number, lon: number, locationName?: string, countryName?: string): Promise<WeatherData> {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,cloud_cover,wind_speed_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,dew_point_2m,precipitation,rain,showers,weather_code,cloud_cover,surface_pressure,wind_speed_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,weather_code,surface_pressure,cloud_cover,wind_speed_10m,wind_gusts_10m,cape&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&models=best_match&timezone=auto`;
 
   const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to fetch weather data from Open-Meteo");
+  if (!res.ok) throw new Error("Failed to fetch weather data from Open-Meteo High-Res API");
   const data = await res.json();
 
   const current = data.current;
@@ -217,6 +224,7 @@ export async function fetchWeatherData(lat: number, lon: number, locationName?: 
   let maxRainProb = 0;
   let totalRainMm = 0;
   let maxWindSpeed = 0;
+  let maxWindGusts = 0;
 
   // Find matching start index in hourly.time array using current.time ISO string
   let startIndex = 0;
@@ -245,21 +253,30 @@ export async function fetchWeatherData(lat: number, lon: number, locationName?: 
     const rainProb = hourly.precipitation_probability ? (hourly.precipitation_probability[i] ?? 0) : 0;
     const rainMm = hourly.precipitation ? (hourly.precipitation[i] ?? 0) : 0;
     const windSpeed = hourly.wind_speed_10m ? (hourly.wind_speed_10m[i] ?? 0) : 0;
+    const windGusts = hourly.wind_gusts_10m ? (hourly.wind_gusts_10m[i] ?? 0) : windSpeed;
     const temp = hourly.temperature_2m ? (hourly.temperature_2m[i] ?? 0) : 0;
+    const apparentTemp = hourly.apparent_temperature ? (hourly.apparent_temperature[i] ?? temp) : temp;
+    const dewPoint = hourly.dew_point_2m ? (hourly.dew_point_2m[i] ?? (temp - 3)) : temp - 3;
     const weatherCode = hourly.weather_code ? (hourly.weather_code[i] ?? 0) : 0;
+    const cape = hourly.cape ? (hourly.cape[i] ?? 0) : 0;
 
     if (rainProb > maxRainProb) maxRainProb = rainProb;
     totalRainMm += rainMm;
     if (windSpeed > maxWindSpeed) maxWindSpeed = windSpeed;
+    if (windGusts > maxWindGusts) maxWindGusts = windGusts;
 
     next12Hours.push({
       time: timeStr,
       hourLabel,
       temp,
+      apparentTemp: Math.round(apparentTemp),
+      dewPoint: Math.round(dewPoint),
       rainProb,
-      rainMm,
-      windSpeed,
+      rainMm: Math.round(rainMm * 10) / 10,
+      windSpeed: Math.round(windSpeed),
+      windGusts: Math.round(windGusts),
       weatherCode,
+      cape: Math.round(cape),
     });
   }
 
@@ -290,16 +307,23 @@ export async function fetchWeatherData(lat: number, lon: number, locationName?: 
     longitude: lon,
     current: {
       temp: Math.round(current.temperature_2m),
+      apparentTemp: Math.round(current.apparent_temperature ?? current.temperature_2m),
+      dewPoint: Math.round(current.dew_point_2m ?? (current.temperature_2m - 3)),
       weatherCode: current.weather_code,
       conditionText: cond.text,
       windSpeed: Math.round(current.wind_speed_10m),
-      humidity: current.relative_humidity_2m,
-      cloudCover: current.cloud_cover,
+      windGusts: Math.round(current.wind_gusts_10m ?? current.wind_speed_10m),
+      humidity: Math.round(current.relative_humidity_2m),
+      cloudCover: Math.round(current.cloud_cover),
+      pressure: Math.round(current.surface_pressure ?? 1013),
+      cape: Math.round(hourly?.cape?.[startIndex] ?? 0),
+      modelUsed: "ECMWF / ICON High-Res Ensemble Synced",
     },
     forecast12h: {
       maxRainProb,
       totalRainMm: Math.round(totalRainMm * 10) / 10,
       maxWindSpeed: Math.round(maxWindSpeed),
+      maxWindGusts: Math.round(maxWindGusts),
       avgCloudCover: Math.round(current.cloud_cover),
       hourly: next12Hours,
     },

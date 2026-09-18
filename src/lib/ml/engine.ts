@@ -222,32 +222,55 @@ export function predictUmbrellaNeed(
     });
   }
 
+  // Feature 7: Atmospheric Dew Point & Condensation Spread
+  const dewSpread = weather.current.temp - weather.current.dewPoint;
+  let fDew = 0;
+  if (dewSpread <= 2 || weather.current.humidity >= 85) {
+    fDew = 0.8;
+    contributions.push({
+      featureName: "Atmospheric Dew Condensation",
+      category: "weather",
+      impactScore: 0.8,
+      description: `High humidity (${weather.current.humidity}%) & narrow dew point spread (${dewSpread}°C)`,
+    });
+  }
+
+  // Feature 8: Atmospheric CAPE Energy (Convective Thunderstorm Instability)
+  let fCape = 0;
+  if (weather.current.cape > 250) {
+    fCape = 0.6;
+    contributions.push({
+      featureName: "Convective CAPE Energy",
+      category: "weather",
+      impactScore: 0.6,
+      description: `Atmospheric CAPE energy (${weather.current.cape} J/kg) indicates localized rain/thunderstorm`,
+    });
+  }
+
   // Raw Logit
-  let Z = w.bias + fRainProb + fPrecip + fMode + fDuration + fTolerance + fJacket;
+  let Z = w.bias + fRainProb + fPrecip + fMode + fDuration + fTolerance + fJacket + fDew + fCape;
 
   // Strict Threshold Mapping:
   // 1. Rain < 20%: Low Umbrella Score (5% - 20%)
   // 2. 20% <= Rain <= 25%: Umbrella Score = 50% (48% - 52%)
   // 3. 26% <= Rain <= 50%: Umbrella Score = 75% - 80% (75% - 80%)
-  // 4. Rain > 50%: Umbrella Score = 80% - 99%
+  // 4. Rain > 50%: Umbrella Score = 81% - 99%
   let probPercent = 10;
   if (maxRainProb < 20) {
     probPercent = Math.min(20, Math.max(5, Math.round(maxRainProb)));
   } else if (maxRainProb >= 20 && maxRainProb <= 25) {
-    // Exactly 50% for 20% to 25% rain probability
     probPercent = 50;
   } else if (maxRainProb > 25 && maxRainProb <= 50) {
-    // 75% to 80% range for 26% to 50% rain probability
-    const step = (maxRainProb - 26) / 24; // 0 to 1
-    probPercent = Math.round(75 + step * 5); // 75% to 80%
+    const step = (maxRainProb - 26) / 24;
+    probPercent = Math.round(75 + step * 5);
   } else {
-    // Above 50% rain probability: 81% to 99%
     const step = (maxRainProb - 50) / 50;
     probPercent = Math.min(99, Math.round(81 + step * 18));
   }
 
-  // Wind Warning
-  const windWarning = maxWindSpeed > 38;
+  // High Wind / Wind Gust Warning
+  const maxWindGusts = relevantHourly.length > 0 ? relevantHourly.reduce((max, h) => Math.max(max, h.windGusts || 0), 0) : weather.current.windGusts;
+  const windWarning = maxWindSpeed > 35 || maxWindGusts > 38;
 
   // Recommendation mappings
   let recommendation: PredictionResult["recommendation"] = "NO_UMBRELLA_NEEDED";
