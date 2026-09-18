@@ -79,8 +79,8 @@ export const AppIntroHero: React.FC<AppIntroHeroProps> = ({
           </h1>
 
           {/* Description */}
-          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Search any city, town, or village — from <strong className="text-cyan-300 font-semibold">Pallassana, Kollengode, & Cheramangalam</strong> in Palakkad to cities worldwide — to view instant AI recommendations & real-time weather details!
+          <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-medium">
+            Search your place to check if you need to bring an umbrella today!
           </p>
 
           {/* SEARCH YOUR PLACE INTERACTIVE BOX */}
